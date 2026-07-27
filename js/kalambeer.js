@@ -30,6 +30,7 @@
         plugin.wordPathIsDrawing = false;
         plugin.wordPathGlobalCounter = 0;
         plugin.checkWordTimeout;
+        plugin.wordPathExtended = [];
     };
 
     //helper functions
@@ -159,8 +160,7 @@
             const plugin = this;
             const wordMinLength = plugin.settings.baseWordLengthMin;
             const wordMaxLength = plugin.settings.baseWordLengthMax;
-            let wordCompleted = false;
-            while (!wordCompleted) {
+            while (true) {
                 let node = plugin.dictTree;
                 let word = '';
                 let wordLength = randomIntFromInterval(wordMinLength, wordMaxLength);
@@ -170,9 +170,7 @@
                         word += letter;
                         node = node[letter];
                         if(word.length >= wordLength && node._ === 1) {
-                            wordCompleted = true;
                             return word;
-                            break;
                         }
                     } else {
                         break;
@@ -220,17 +218,17 @@
         },
         createMap : function() {
             const plugin = this;
-            plugin.map = new Array(plugin.settings.height);
-            plugin.cellsMatrix = new Array(plugin.settings.height);
-            plugin.cellsAccessMatrix = new Array(plugin.settings.height);
-            for (let y = 0; y < plugin.settings.height; y++) {
-                plugin.map[y] = new Array(plugin.settings.width);
-                plugin.cellsMatrix[y] = new Array(plugin.settings.width);
-                plugin.cellsAccessMatrix[y] = new Array(plugin.settings.width);
-                for (let x = 0; x < plugin.settings.width; x++) {
-                    plugin.map[y][x] = 0;
-                    plugin.cellsMatrix[y][x] = 0;
-                    plugin.cellsAccessMatrix[y][x] = {
+            plugin.map = new Array(plugin.settings.width);
+            plugin.cellsMatrix = new Array(plugin.settings.width);
+            plugin.cellsAccessMatrix = new Array(plugin.settings.width);
+            for (let x = 0; x < plugin.settings.width; x++) {
+                plugin.map[x] = new Array(plugin.settings.height);
+                plugin.cellsMatrix[x] = new Array(plugin.settings.height);
+                plugin.cellsAccessMatrix[x] = new Array(plugin.settings.height);
+                for (let y = 0; y < plugin.settings.height; y++) {
+                    plugin.map[x][y] = 0;
+                    plugin.cellsMatrix[x][y] = 0;
+                    plugin.cellsAccessMatrix[x][y] = {
                         'active': false,
                         'allow': true
                     };
@@ -256,30 +254,31 @@
         },
         fillMapWithBaseWord: function() {
             const plugin = this;
+            while (!plugin.tryFillMapWithBaseWord()) {
+                plugin.createMap();
+            }
+        },
+        tryFillMapWithBaseWord: function() {
+            const plugin = this;
             let newX, newY;
             let x = parseInt(Math.random() * plugin.settings.width);
             let y = parseInt(Math.random() * plugin.settings.height);
             plugin.map[x][y] = plugin.baseWord.charAt(0);
             for (let i = 1; i < plugin.baseWord.length; i++) {
-                const availableCoords = plugin.getAvailableCloseForBaseWordLetter(x,y);
-                if(!availableCoords.length) {
-                    plugin.restartFillMapWithBaseWord();
+                const availableCoords = plugin.getAvailableCloseForBaseWordLetter(x, y);
+                if (!availableCoords.length) {
                     return false;
                 }
                 do {
-                    let coord = plugin.randomCoordinates(availableCoords);
+                    const coord = plugin.randomCoordinates(availableCoords);
                     newX = parseInt(x + coord.x);
                     newY = parseInt(y + coord.y);
-                } while(!plugin.checkBorder(newX, newY) || plugin.map[newX][newY]);
+                } while (!plugin.checkBorder(newX, newY) || plugin.map[newX][newY]);
                 x = newX;
                 y = newY;
                 plugin.map[x][y] = plugin.baseWord.charAt(i);
             }
-        },
-        restartFillMapWithBaseWord: function() {
-            const plugin = this;
-            plugin.createMap();
-            plugin.fillMapWithBaseWord();
+            return true;
         },
         fillMapWithRandomLetters: function() {
             const plugin = this;
@@ -564,7 +563,7 @@
                     triangleCord[1] = {'x': 0, 'y': sideOfTheTriangle1 };
                 }
             }
-            if(y1 == y2) {
+            else if(y1 == y2) {
                 triangleCord[0] = {'x': 0, 'y': -sideOfTheTriangle1 };
                 triangleCord[2] = {'x': 0, 'y':  sideOfTheTriangle1 };
                 triangleCord[3] = {'x': 0, 'y': -sideOfTheTriangle1 };
@@ -579,7 +578,7 @@
                     triangleCord[1] = {'x': sideOfTheTriangle1, 'y': 0};
                 }
             }
-            if(y1 > y2) {
+            else if(y1 > y2) {
                 marginY1 = - arrowLength;
                 marginY2 = - arrowLength - sideOfTheTriangle2 + arrowEdgeMargin;
                 if(x1 > x2) {
@@ -603,7 +602,7 @@
                     ];
                 }
             }
-            if(y1 < y2) {
+            else if(y1 < y2) {
                 marginY1 = arrowLength;
                 marginY2 = arrowLength + sideOfTheTriangle2 - arrowEdgeMargin;
                 if(x1 > x2) {
@@ -851,7 +850,7 @@
                     plugin.wordPathExtended.push({x,y,prevX,prevY,letter,color});
                 }
                 plugin.wordPathIsDrawing = true;
-                plugin.wordPathLastTime = new Date();
+                plugin.wordPathLastTime = Date.now();
                 requestAnimationFrame(plugin.drawWordPath.bind(plugin));
             });
         },
@@ -894,6 +893,7 @@
             'time': 120, //in seconds
             'timeForShowingCorrectWord': 350, //in miliseconds
             initCallback: function() { },
+            loadCallback: function() { },
             endCallback: function(allWords, foundWords) { }
         }
     };
