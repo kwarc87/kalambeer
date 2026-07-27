@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+
+# Node.js (dictionary generation scripts)
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Dictionary source files (large, not needed for the app)
+data/src/
+
+# Build artifacts (regenerated via scripts/)
+dictfull_full.json
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db

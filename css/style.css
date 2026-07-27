@@ -1,0 +1,346 @@
+body {
+    background: url("../img/bg.jpg") #D20107 repeat-x top center;
+    margin: 0;
+    font-size: 13px;
+}
+.navbar {
+    margin-bottom: 40px;
+}
+.navbar-inverse {
+    border-color: transparent;
+    background: #1C1C1C;
+    color: #fff;
+    border-radius: 0;
+}
+.navbar-inverse .navbar-brand {
+    color: #fff;
+    text-transform: uppercase;
+}
+.navbar-brand {
+    display: inline-block;
+    float: none;
+    height: auto;
+}
+.map {
+    display: block;
+    margin: 118px auto;
+    width: 260px;
+    min-height: 260px;
+    cursor: pointer;
+}
+.map-results,
+.map.map-results {
+    margin: 20px auto;
+    opacity: 0.65;
+}
+.buttons-container {
+    width: 260px;
+    margin: 0 auto 20px;
+}
+.column {
+    height: 60px;
+    clear: both;
+    margin-top: 1px;
+    text-align: center;
+}
+.mapRow {
+    float: left;
+    position: relative;
+    margin: 3px;
+    border-radius: 5px;
+    width: 59px;
+    height: 59px;
+    background: #D20107;
+    color: #FFF;
+    font-family: "Arial", sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 59px;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.mapRow:hover {
+    background: #C50007;
+}
+.mapRow.active {
+    background: #8C0005;
+}
+.mapRow.correct,
+.mapRow.active.correct {
+    background: #2B8603;
+    color: #FFF;
+}
+.mapRow.repetition,
+.mapRow.active.repetition {
+    background: #DF780A;
+}
+.game-loader {
+    display: block;
+    margin: -10px 0 0 -90px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 9;
+}
+.loader-desc {
+    font-family: 'Roboto Slab';
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 0;
+    position: absolute;
+    top: 52%;
+    left: 0;
+    width: 100%;
+}
+.standard-box {
+    background: #FFF;
+    position: relative;
+    vertical-align: top;
+    border-left: 1px solid #E9E9E9;
+    border-right: 1px solid #E9E9E9;
+    border-bottom: 2px solid #D6DDDF;
+    margin: 0 auto 20px;
+}
+.standard-box-header {
+    font-family: 'Roboto Slab';
+    background: #1C1C1C;
+    padding: 11px 20px;
+    margin: 0 -1px;
+    position: relative;
+    font-size: 16px;
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.standard-box-content {
+    padding: 15px;
+}
+ul {
+    padding-left: 15px;
+}
+ul li {
+    padding-bottom: 10px;
+}
+ul li:last-child {
+    padding-bottom: 0;
+}
+blockquote {
+    background: #F9D3D3;
+    border-color: #D20107;
+    font-size: 12px;
+    margin: 0;
+}
+.table>thead>tr>th {
+    border-color: #1C1C1C;
+}
+.table>tbody>tr>td,
+.table>tbody>tr>th,
+.table>tfoot>tr>td,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>thead>tr>th {
+    border-color: #1C1C1C;
+}
+.form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+.form-group .input-loader {
+    position: absolute;
+    top: 3px;
+    right: 4px;
+}
+label.error {
+    color: #D20107;
+    font-weight: 300;
+    line-height: 1.3;
+    margin: 5px 0 0 0;
+}
+.btn {
+    text-transform: uppercase;
+    font-weight: 400;
+}
+.btn-success {
+    background: #2B8603;
+    border-color: #0A7D01;
+}
+.btn-success:hover,
+.btn-success:focus {
+    background: #0A7D01;
+}
+.btn-danger {
+    background: #D20107;
+    border-color: #C50007;
+}
+.btn-danger:hover,
+.btn-danger:focus {
+    background: #C50007;
+}
+.btn-choice-container {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    z-index: 11;
+    width: 100%;
+    padding: 0 15px;
+    margin: -70px 0 0 0;
+}
+.btn-choice-container h2 {
+    font-family: 'Roboto Slab';
+    font-size: 22px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0;
+}
+.btn-choice-container .btn {
+    margin: 20px auto 0;
+    width: 80%;
+    padding: 8px 12px;
+    white-space: normal;
+}
+.word {
+    display: inline-block;
+    padding: 4px 8px 3px;
+    border-radius: 3px;
+    background: #D20107;
+    border: 2px solid #D20107;
+    color: #FFF;
+    margin: 0 4px 4px 0;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.word.active {
+    background: #8C0005;
+    border: 2px solid #8C0005;
+}
+.word.checking {
+    border: 2px solid #1C1C1C;
+}
+.word.checking.active {
+    border: 2px solid #1C1C1C;
+}
+.score,
+.timer {
+    font-family: 'Roboto Slab';
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    position: absolute;
+    top: 15px;
+    z-index: 11;
+    text-transform: uppercase;
+}
+.score {
+    left: 15px;
+}
+.timer {
+    right: 15px;
+}
+.current-word {
+    position: absolute;
+    top: 40px;
+    width: 100%;
+    text-align: center;
+    left: 0;
+}
+.btn-start {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 11;
+    width: 120px;
+    font-size: 18px;
+    margin: -23px 0 0 -60px;
+}
+.all-words {
+    padding: 0 20px;
+    text-align: center;
+}
+.results h3 {
+    font-family: 'Roboto Slab';
+    font-size: 22px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 60px 0 20px;
+}
+.all-words h4 {
+    font-family: 'Roboto Slab';
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 40px 0;
+}
+.results {
+    margin-top: 20px;
+}
+.results-first {
+    max-width: 260px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.results .btn-start {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin: 0 0 20px;
+    width: 100%;
+}
+.percent-result,
+.results .percent-result,
+.all-words .percent-result {
+    font-size: 40px;
+    color: #B90000;
+    margin: 0 0 20px;
+}
+.footer {
+    padding: 15px;
+    background: #1C1C1C;
+    color: #fff;
+}
+html, body {
+    height: 100%;
+}
+.page-wrap {
+    min-height: 100%;
+    margin-bottom: -50px;
+}
+.page-wrap:after {
+    content: "";
+    display: block;
+}
+.footer,
+.page-wrap:after {
+    height: 50px;
+}
+.btn-group-xs>.btn, .btn-xs {
+    line-height: 1.3;
+    font-size: 11px;
+}
+@media (max-width: 1199px) {
+    .loader-desc {
+        top: 54%;
+    }
+}
+@media (max-width: 767px) {
+    .navbar {
+        margin-bottom: 20px;
+    }
+    .map {
+        margin: 45px auto 15px;
+    }
+    .buttons-container {
+        margin: 0 auto;
+    }
+    .current-word {
+        top: 30px;
+    }
+    .btn-choice-container .btn {
+        width: 100%;
+    }
+}
+@media (min-width: 1200px) {
+    .standard-box {
+        min-height: 528px;
+    }
+}
