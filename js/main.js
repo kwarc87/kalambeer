@@ -1,49 +1,153 @@
-$(document).ready(function() {
-    $(".btn-choice").on("click", function(e) {
-        e.preventDefault();
-        var dictChoice = $(this).data('dict');
-        var time = $(this).data('time');
-        $("#dict-choice").hide();
-        $("#game-loader").show();
-        $("#loader-desc").show();
-        $("#map").kalambeer({
-            "mode" : dictChoice,
-            "dictionaryFullPath" : "data/dict_tree_"+dictChoice+"_compressed",
-            "time": time,
-            loadCallback: function() {
-                $(".btn-start").show();
-                $("#game-loader").hide();
-                $("#loader-desc").hide();
-            },
-            initCallback: function() {
-                $("#game-loader").hide();
-                $("#results1").hide();
-                $("#results2").hide();
-                $("#messages").hide();
-                $("#map").removeClass('map-results');
-                $("#all-words-list").text("");
-            },
-            endCallback: function(allWords, foundWords) {
-                $("#map").addClass('map-results');
-                $("#control-start").hide();
-                $("#results1").show();
-                $("#results2").show();
-                $("#all-words-container").show();
-                var maxScore = parseInt($("#max-score").text());
-                var userScore = parseInt($("#score").text());
-                var percentScore  = Math.floor((userScore/maxScore)*100)+"%";
-                $("#percent-score").html(percentScore);
-                $("#max_result").val(maxScore);
-                $("#user_result").val(userScore);
-            }
+var SCORES_API_URL = 'https://jakubkwarcinski.pl/kalambeer/backend/scores.php';
+var RECAPTCHA_SITE_KEY = '6LeLpWstAAAAANPJGtw_ADcDaLsnTk13evyQip86';
+var currentNick = '';
+var currentScore = 0;
+var currentMaxScore = 0;
+
+function validateNick(nick) {
+    nick = nick.trim();
+    if (!nick.length) return 'Nick nie może być pusty.';
+    if (nick.length < 3) return 'Nick musi mieć co najmniej 3 znaki.';
+    if (nick.length > 20) return 'Nick może mieć maksymalnie 20 znaków.';
+    if (!/^[a-zA-Z0-9\u00C0-\u024F _-]+$/.test(nick)) return 'Nick może zawierać tylko litery, cyfry, spacje, - i _.';
+    return null;
+}
+
+function buildLeaderboardRows(scores) {
+    if (!scores || !scores.length) {
+        return '<tr><td colspan="5" class="text-center">Brak wyników — bądź pierwszy!</td></tr>';
+    }
+    return scores.map(function(row, i) {
+        return '<tr><td>' + (i + 1) + '</td>' +
+            '<td>' + $('<span>').text(row.nickname).html() + '</td>' +
+            '<td><strong>' + row.percent_score + '%</strong></td>' +
+            '<td>' + row.score + ' / ' + row.max_score + '</td>' +
+            '<td>' + row.date + '</td></tr>';
+    }).join('');
+}
+
+function loadLeaderboard() {
+    fetch(SCORES_API_URL)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var rows = buildLeaderboardRows(data.scores);
+            $('#results-lb-body, #page-lb-body').html(rows);
+            $('.leaderboard-loading').hide();
+            $('.leaderboard-table').show();
+        })
+        .catch(function() {
+            $('.leaderboard-loading').text('Nie udało się załadować tablicy wyników.');
+        });
+}
+
+function saveScore(nickname, score, maxScore) {
+    $('#save-score-status').removeClass('alert-success alert-danger').addClass('alert alert-info').text('Zapisywanie wyniku...').show();
+    grecaptcha.ready(function() {
+        grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'submit_score' }).then(function(token) {
+            fetch(SCORES_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname: nickname, score: score, max_score: maxScore, recaptchaToken: token })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.message) {
+                    $('#save-score-status').removeClass('alert-info alert-danger').addClass('alert alert-success').text('Wynik zapisany!');
+                    loadLeaderboard();
+                } else {
+                    $('#save-score-status').removeClass('alert-info alert-success').addClass('alert alert-danger').text(data.error || 'Nie udało się zapisać wyniku.');
+                }
+            })
+            .catch(function() {
+                $('#save-score-status').removeClass('alert-info alert-success').addClass('alert alert-danger').text('Błąd połączenia z serwerem.');
+            });
         });
     });
-    $(".btn-start").on("click", function(e) {
+}
+
+function startGame(dictChoice, time) {
+    $('#dict-choice').hide();
+    $('#game-loader').show();
+    $('#loader-desc').show();
+
+    $('#map').kalambeer({
+        mode: dictChoice,
+        dictionaryFullPath: 'data/dict_tree_' + dictChoice + '_compressed',
+        time: time,
+        loadCallback: function() {
+            $('#game-loader, #loader-desc').hide();
+            $('#map').kalambeer('init');
+        },
+        errorCallback: function(e) {
+            $('#game-loader, #loader-desc').hide();
+            $('#dict-choice').show();
+            $('#messages').text('Nie udało się załadować słownika. Odśwież stronę i spróbuj ponownie.').show();
+        },
+        initCallback: function() {
+            $('#results1, #results2, #messages, #results-leaderboard, #game-loader').hide();
+            $('#map').removeClass('map-results');
+            $('#all-words-list').text('');
+            $('#save-score-status').hide();
+        },
+        endCallback: function() {
+            currentMaxScore = parseInt($('#max-score').text());
+            currentScore = parseInt($('#score').text());
+            $('#percent-score').html(Math.floor((currentScore / currentMaxScore) * 100) + '%');
+            $('#map').addClass('map-results');
+            $('#control-start').hide();
+            $('#results1, #results2, #all-words-container, #results-leaderboard').show();
+            saveScore(currentNick, currentScore, currentMaxScore);
+        }
+    });
+}
+
+$(document).ready(function() {
+    loadLeaderboard();
+
+    $('#nickname-input').on('input', function() {
+        var error = validateNick($.trim($(this).val()));
+        if (error) {
+            $('#nick-error').text(error).show();
+            $('#btn-play').prop('disabled', true);
+        } else {
+            $('#nick-error').hide();
+            $('#btn-play').prop('disabled', false);
+        }
+    });
+
+    $('#btn-play').on('click', function(e) {
         e.preventDefault();
-        $("#all-words-container").hide();
-        $("#map").html("");
-        $("#map").show();
-        $("#control-start").hide();
-        $("#map").kalambeer('init');
+        var nick = $.trim($('#nickname-input').val());
+        var error = validateNick(nick);
+        if (error) { $('#nick-error').text(error).show(); $('#nickname-input').focus(); return; }
+        $('#nick-error').hide();
+        currentNick = nick;
+        var dictChoice = $('#dict-select').val();
+        startGame(dictChoice, dictChoice === 'full' ? 18 : 60);
+    });
+
+    $('#nickname-input').on('keypress', function(e) {
+        if (e.which === 13) $('#btn-play').trigger('click');
+    });
+
+    $('#btn-leaderboard').on('click', function() {
+        $('.leaderboard-loading').show();
+        $('.leaderboard-table').hide();
+        loadLeaderboard();
+        $('#view-game').hide();
+        $('#view-leaderboard').show();
+    });
+
+    $('.btn-back').on('click', function() {
+        $('#view-leaderboard').hide();
+        $('#view-game').show();
+    });
+
+    $(document).on('click', '.btn-restart', function(e) {
+        e.preventDefault();
+        $('#all-words-container, #results-leaderboard').hide();
+        $('#map').html('').show();
+        $('#control-start').hide();
+        $('#map').kalambeer('init');
     });
 });

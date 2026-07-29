@@ -18,6 +18,9 @@ dictfull_full.json
 
 # Editor / IDE
 .vscode/
+
+# Backend — credentials (never commit)
+backend/config.php
 .idea/
 *.swp
 *.swo

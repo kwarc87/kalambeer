@@ -274,10 +274,62 @@ label.error {
     margin-top: 20px;
 }
 .results-first {
-    max-width: 260px;
+    max-width: 300px;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
+}
+.btn-choice-container h2 {
+    margin-bottom: 20px;
+}
+.btn-choice-container .form-group {
+    margin-bottom: 0;
+}
+.btn-choice-container .form-control {
+    width: 80%;
+    margin: 0 auto;
+    display: block;
+}
+#dict-select {
+    margin-top: 10px;
+}
+.nick-error {
+    font-size: 12px;
+    margin-top: 5px;
+    color: #a94442;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+#btn-play {
+    margin-top: 20px;
+}
+#btn-leaderboard {
+    margin-top: 8px;
+}
+#save-score-status {
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    font-size: 13px;
+}
+.results-leaderboard {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+.leaderboard-table {
+    font-size: 13px;
+    margin-bottom: 0;
+}
+.leaderboard-table th {
+    background: #1C1C1C;
+    color: #fff;
+}
+.leaderboard-table tbody tr:nth-child(1) td:first-child { color: #B8860B; font-weight: bold; }
+.leaderboard-table tbody tr:nth-child(2) td:first-child { color: #808080; font-weight: bold; }
+.leaderboard-table tbody tr:nth-child(3) td:first-child { color: #CD7F32; font-weight: bold; }
+.btn-back {
+    margin-top: 10px;
 }
 .results .btn-start {
     position: relative;

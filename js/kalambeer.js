@@ -5,10 +5,9 @@
         const plugin = this;
         plugin.settings = $.extend({}, settings.defaults, options);
         plugin.$element = $(element);
-        plugin.lettersProbabilityBasic = {'a':140384,'b':19836,'d':32851,'n':79844,'k':65446,'ń':2878,'c':47989,'z':66067,'y':66514,'s':56890,'i':97224,'u':27813,'o':121547,'t':59571,'j':16249,'ż':5878,'r':78699,'e':77080,'v':340,'h':11187,'g':19078,'m':31063,'l':40192,'p':41201,'w':61279,'ć':26476,'ł':14197,'f':9660,'x':136,'ś':8801,'ą':4746,'ó':5925,'ę':5623,'ź':923,'q':62};
-        plugin.lettersProbabilityFull = {'a':2873103,'b':588721,'c':1254805,'e':2343069,'i':2738752,'d':672064,'ń':86159,'s':990592,'y':1519557,'k':971756,'ą':393392,'h':353903,'g':404528,'o':2439605,'j':598458,'m':1186617,'u':830348,'n':2090630,'ę':197553,'w':1389167,'ó':108701,'z':1429225,'l':731994,'t':837991,'ż':198292,'r':1348771,'p':911566,'ć':36480,'ś':296240,'ł':644352,'f':135795,'v':220,'x':566,'ź':21914,'q':9}
+        plugin.lettersProbabilityBasic = {};
+        plugin.lettersProbabilityFull = {};
         plugin.baseWord;
-        plugin.dictArray = [];
         plugin.dictTree = {};
         plugin.map = [];
         plugin.cells = new Array(plugin.settings.width*plugin.settings.height);
@@ -87,19 +86,46 @@
     kalambeerObj.prototype = {
         load: function() {
             const plugin = this;
-            const xhr = new XMLHttpRequest();
-            xhr.open('get', plugin.settings.dictionaryFullPath, true);
-            xhr.responseType = 'arraybuffer';
-            xhr.onload = () => plugin.prepareData(xhr.response);
-            xhr.send();
+            const dictPromise = new Promise(function(resolve, reject) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('get', plugin.settings.dictionaryFullPath, true);
+                xhr.responseType = 'arraybuffer';
+                xhr.onload = function() {
+                    if (xhr.status !== 200) { reject(new Error('Dictionary load error: HTTP ' + xhr.status)); return; }
+                    resolve(xhr.response);
+                };
+                xhr.onerror = function() { reject(new Error('Network error while loading dictionary.')); };
+                xhr.send();
+            });
+            const fetchJson = function(path) {
+                return fetch(path).then(function(r) {
+                    if (!r.ok) throw new Error('Probability load error: HTTP ' + r.status + ' (' + path + ')');
+                    return r.json();
+                });
+            };
+            Promise.all([
+                dictPromise,
+                fetchJson(plugin.settings.probabilityBasicPath),
+                fetchJson(plugin.settings.probabilityFullPath)
+            ]).then(function(results) {
+                plugin.lettersProbabilityBasic = results[1];
+                plugin.lettersProbabilityFull = results[2];
+                plugin.prepareData(results[0]);
+            }).catch(function(e) {
+                plugin.settings.errorCallback(e);
+            });
         },
         prepareData: function(data) {
             const plugin = this;
-            const decoder = new TextDecoder();
-            const uncompressedData = pako.inflate(data);
-            const jsonString = decoder.decode(uncompressedData);
-            plugin.dictTree = JSON.parse(jsonString);
-            plugin.settings.loadCallback();
+            try {
+                const decoder = new TextDecoder();
+                const uncompressedData = pako.inflate(data);
+                const jsonString = decoder.decode(uncompressedData);
+                plugin.dictTree = JSON.parse(jsonString);
+                plugin.settings.loadCallback();
+            } catch(e) {
+                plugin.settings.errorCallback(new Error('Dictionary parse error: ' + e.message));
+            }
         },
         init: function() {
             const plugin = this;
@@ -118,49 +144,12 @@
             plugin.calculateMaxScore();
             plugin.startCounter();
         },
-        // make dictionary tree from dictionary array
-        prepareDictTree: function(dictArray) {
-            const tree = {};
-            let letter, node, nextNode;
-            dictArray.forEach(word => {
-                node = tree;
-                for (letter of word) {
-                    nextNode = node[letter];
-                    node = nextNode ? nextNode : node[letter] = {};
-                }
-                node._ = 1;
-            });
-            return tree;
-        },
-        // make dictionary tree with letter's wages from dictionary array
-        prepareDictTreeWithWages: function(dictArray) {
-            const tree = {};
-            let letter, node, nextNode;
-            dictArray.forEach(word => {
-                node = tree;
-                for (letter of word) {
-                    nextNode = node[letter];
-                    node = nextNode ? nextNode : node[letter] = {$: 0};
-                    node.$++;
-                }
-                node._ = 1;
-            });
-            return tree;
-        },
-        randomBaseWordFromDictionaryArray: function() {
-            const plugin = this;
-            let word;
-            do {
-                let index = randomIntFromInterval(0, plugin.dictArray.length - 1);
-                word = plugin.dictArray[index];
-            } while (word.length < plugin.settings.baseWordLengthMin);
-            return word;
-        },
         randomBaseWordFromDictionaryTree: function() {
             const plugin = this;
             const wordMinLength = plugin.settings.baseWordLengthMin;
             const wordMaxLength = plugin.settings.baseWordLengthMax;
-            while (true) {
+            const maxAttempts = 1000;
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
                 let node = plugin.dictTree;
                 let word = '';
                 let wordLength = randomIntFromInterval(wordMinLength, wordMaxLength);
@@ -177,6 +166,7 @@
                     }
                 }
             }
+            throw new Error('Failed to generate base word after ' + maxAttempts + ' attempts. Check dictionary configuration and length settings.');
         },
         //this method get random letter for base word respecting wages from optimized dictionary
         randomLetterForBaseWordFromDictionaryTree: function(node) {
@@ -296,32 +286,28 @@
             for (let x = 0; x < plugin.settings.width; x++) {
                 for (let y = 0; y < plugin.settings.height; y++) {
                     let letter = plugin.map[x][y];
-                    let row = x;
-                    let col = y;
                     let cell = {
-                        row: row,
-                        col: col,
+                        x: x,
+                        y: y,
                         letter: letter,
                         close: []
                     };
                     plugin.cells[index] = cell;
-                    plugin.cellsMatrix[row][col] = cell;
+                    plugin.cellsMatrix[x][y] = cell;
                     index++;
                 }
             }
         },
-        setCloseForCell: function(close, row, col) {
+        setCloseForCell: function(close, x, y) {
             const plugin = this;
-            if(plugin.checkBorder(row,col)) { close.push(plugin.cellsMatrix[row][col]) }
+            if(plugin.checkBorder(x,y)) { close.push(plugin.cellsMatrix[x][y]) }
         },
         setProximity: function() {
             const plugin = this;
             plugin.cells.forEach(cell=> {
-                let row = cell.row;
-                let col = cell.col;
                 let close = cell.close;
                 plugin.possibleCoordinates.forEach(coord => {
-                    plugin.setCloseForCell(close, row + coord.x, col + coord.y);
+                    plugin.setCloseForCell(close, cell.x + coord.x, cell.y + coord.y);
                 });
             });
         },
@@ -348,7 +334,7 @@
                 }
                 const wordPosition = plugin.wordsPaths[prefix.toUpperCase()] = [];
                 for (let i = 0; i < path.length; i += 1) {
-                    wordPosition.push([path[i]['row'], path[i]['col']]);
+                    wordPosition.push({x: path[i].x, y: path[i].y});
                 }
             }
             const close = cell.close;
@@ -426,6 +412,7 @@
         },
         bindMouseEvents: function() {
             const plugin = this;
+            plugin.unbindEvents();
             let startEvents, moveEvents, endEvents;
             if($.isTouchCapable()) {
                 startEvents = 'tapstart.kalambeer';
@@ -837,13 +824,13 @@
                 const word = $(this).text();
                 const wordPath = plugin.wordsPaths[word];
                 for (let i = 0; i < wordPath.length; i++) {
-                    const x = wordPath[i][0];
-                    const y = wordPath[i][1];
+                    const x = wordPath[i].x;
+                    const y = wordPath[i].y;
                     let prevX = false;
                     let prevY = false;
                     if(i > 0) {
-                        prevX = wordPath[i-1][0];
-                        prevY = wordPath[i-1][1];
+                        prevX = wordPath[i-1].x;
+                        prevY = wordPath[i-1].y;
                     }
                     const letter = word.charAt(i);
                     const color = plugin.settings.cellCorrectColor;
@@ -890,10 +877,13 @@
             'currentWordSelector': '#current-word',
             'allWordsSelector': '#all-words-list',
             'dictionaryFullPath' : 'data/dict_tree_basic_compressed',
+            'probabilityBasicPath' : 'data/probabilities/probability_basic.json',
+            'probabilityFullPath' : 'data/probabilities/probability_full.json',
             'time': 120, //in seconds
             'timeForShowingCorrectWord': 350, //in miliseconds
             initCallback: function() { },
             loadCallback: function() { },
+            errorCallback: function(e) { },
             endCallback: function(allWords, foundWords) { }
         }
     };

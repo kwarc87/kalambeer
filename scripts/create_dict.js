@@ -71,8 +71,8 @@
     }
 
     function saveDictToFileCompressed() {
-        //const dictOpt = prepareDictWithWages(dict);
-        const dictStr = JSON.stringify(dict);
+        const dictOpt = prepareDictWithWages(dict);
+        const dictStr = JSON.stringify(dictOpt);
         const binaryString = pako.deflate(dictStr);
         fs.writeFile('dict_tree_full_compressed', binaryString, 'utf8');
     }
