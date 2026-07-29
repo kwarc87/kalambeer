@@ -324,6 +324,7 @@ label.error {
 .leaderboard-table tbody tr:nth-child(1) td:first-child { color: #B8860B; font-weight: bold; }
 .leaderboard-table tbody tr:nth-child(2) td:first-child { color: #808080; font-weight: bold; }
 .leaderboard-table tbody tr:nth-child(3) td:first-child { color: #CD7F32; font-weight: bold; }
+.leaderboard-table tbody tr.lb-highlight td { background-color: #f9d3d3; }
 .btn-back {
     margin-top: 10px;
 }

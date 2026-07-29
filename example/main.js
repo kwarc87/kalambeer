@@ -13,12 +13,13 @@ function validateNick(nick) {
     return null;
 }
 
-function buildLeaderboardRows(scores) {
+function buildLeaderboardRows(scores, highlightId) {
     if (!scores || !scores.length) {
         return '<tr><td colspan="5" class="text-center">Brak wyników — bądź pierwszy!</td></tr>';
     }
     return scores.map(function(row, i) {
-        return '<tr><td>' + (i + 1) + '</td>' +
+        var trClass = (highlightId && parseInt(row.id) === highlightId) ? ' class="lb-highlight"' : '';
+        return '<tr' + trClass + '><td>' + (i + 1) + '</td>' +
             '<td>' + $('<span>').text(row.nickname).html() + '</td>' +
             '<td><strong>' + parseFloat(row.percent_score).toFixed(2) + '%</strong></td>' +
             '<td>' + row.score + ' / ' + row.max_score + '</td>' +
@@ -26,11 +27,11 @@ function buildLeaderboardRows(scores) {
     }).join('');
 }
 
-function loadLeaderboard() {
+function loadLeaderboard(highlightId) {
     fetch(SCORES_API_URL)
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            var rows = buildLeaderboardRows(data.scores);
+            var rows = buildLeaderboardRows(data.scores, highlightId);
             $('#results-lb-body, #page-lb-body').html(rows);
             $('.leaderboard-loading').hide();
             $('.leaderboard-table').show();
@@ -53,7 +54,7 @@ function saveScore(nickname, score, maxScore) {
             .then(function(data) {
                 if (data.message) {
                     $('#save-score-status').removeClass('alert-info alert-danger').addClass('alert alert-success').text('Wynik zapisany!');
-                    loadLeaderboard();
+                    loadLeaderboard(data.id || null);
                 } else {
                     $('#save-score-status').removeClass('alert-info alert-success').addClass('alert alert-danger').text(data.error || 'Nie udało się zapisać wyniku.');
                 }

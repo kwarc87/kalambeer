@@ -119,7 +119,7 @@ function checkIpRateLimit(PDO $pdo): bool {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
         $stmt = getDb()->query(
-            'SELECT nickname, DATE_FORMAT(date, "%Y-%m-%d") AS date,
+            'SELECT id, nickname, DATE_FORMAT(date, "%Y-%m-%d") AS date,
                     score, max_score, percent_score
              FROM scores
              ORDER BY percent_score DESC, score DESC
@@ -178,8 +178,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              VALUES (?, NOW(), ?, ?, ?)'
         );
         $stmt->execute([$nickname, $score, $maxScore, $percentScore]);
+        $insertedId = (int) $pdo->lastInsertId();
 
-        jsonResponse(200, ['message' => 'Wynik zapisany pomyślnie.']);
+        jsonResponse(200, ['message' => 'Wynik zapisany pomyślnie.', 'id' => $insertedId]);
     } catch (PDOException $e) {
         jsonResponse(500, ['error' => 'Błąd serwera.']);
     }
