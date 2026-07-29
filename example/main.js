@@ -104,6 +104,13 @@ function startGame(dictChoice, time) {
 $(document).ready(function() {
     loadLeaderboard();
 
+    try {
+        var savedNick = localStorage.getItem('kalambeer_nick');
+        if (savedNick) {
+            $('#nickname-input').val(savedNick).trigger('input');
+        }
+    } catch(ex) {}
+
     $('#nickname-input').on('input', function() {
         var error = validateNick($.trim($(this).val()));
         if (error) {
@@ -122,6 +129,7 @@ $(document).ready(function() {
         if (error) { $('#nick-error').text(error).show(); $('#nickname-input').focus(); return; }
         $('#nick-error').hide();
         currentNick = nick;
+        try { localStorage.setItem('kalambeer_nick', nick); } catch(ex) {}
         var dictChoice = $('#dict-select').val();
         startGame(dictChoice, dictChoice === 'full' ? 180 : 60);
     });
