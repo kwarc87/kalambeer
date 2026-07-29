@@ -311,11 +311,7 @@ label.error {
     margin-bottom: 10px;
     padding: 6px 10px;
     font-size: 13px;
-}
-.results-leaderboard {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #ddd;
+    text-align: center;
 }
 .leaderboard-table {
     font-size: 13px;

@@ -5,10 +5,10 @@
   "description": "Gra słowna Kalambeer",
   "scripts": {
     "start": "esbuild --servedir=. --serve=3000",
-    "build:js": "terser js/kalambeer.js -o js/kalambeer.min.js && terser js/main.js -o js/main.min.js",
+    "build:js": "terser plugin/kalambeer.js -o plugin/kalambeer.min.js && terser example/main.js -o example/main.min.js",
     "build:css": "lightningcss --minify css/style.css -o css/style.min.css",
     "build": "npm run build:js && npm run build:css",
-    "watch:js": "onchange js/kalambeer.js js/main.js -- npm run build:js",
+    "watch:js": "onchange plugin/kalambeer.js example/main.js -- npm run build:js",
     "watch:css": "onchange css/style.css -- npm run build:css",
     "dev": "npm run build && concurrently \"npm run start\" \"npm run watch:js\" \"npm run watch:css\""
   },

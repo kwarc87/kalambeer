@@ -92,7 +92,7 @@ function startGame(dictChoice, time) {
         endCallback: function() {
             currentMaxScore = parseInt($('#max-score').text());
             currentScore = parseInt($('#score').text());
-            $('#percent-score').html(Math.floor((currentScore / currentMaxScore) * 100) + '%');
+            $('#percent-score').html(((currentScore / currentMaxScore) * 100).toFixed(2) + '%');
             $('#map').addClass('map-results');
             $('#control-start').hide();
             $('#results1, #results2, #all-words-container, #results-leaderboard').show();
