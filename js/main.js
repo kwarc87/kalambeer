@@ -20,7 +20,7 @@ function buildLeaderboardRows(scores) {
     return scores.map(function(row, i) {
         return '<tr><td>' + (i + 1) + '</td>' +
             '<td>' + $('<span>').text(row.nickname).html() + '</td>' +
-            '<td><strong>' + row.percent_score + '%</strong></td>' +
+            '<td><strong>' + parseFloat(row.percent_score).toFixed(2) + '%</strong></td>' +
             '<td>' + row.score + ' / ' + row.max_score + '</td>' +
             '<td>' + row.date + '</td></tr>';
     }).join('');
@@ -123,7 +123,7 @@ $(document).ready(function() {
         $('#nick-error').hide();
         currentNick = nick;
         var dictChoice = $('#dict-select').val();
-        startGame(dictChoice, dictChoice === 'full' ? 18 : 60);
+        startGame(dictChoice, dictChoice === 'full' ? 180 : 60);
     });
 
     $('#nickname-input').on('keypress', function(e) {

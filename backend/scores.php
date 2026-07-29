@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     score, max_score, percent_score
              FROM scores
              ORDER BY percent_score DESC, score DESC
-             LIMIT 20'
+             LIMIT 50'
         );
         jsonResponse(200, ['scores' => $stmt->fetchAll()]);
     } catch (PDOException $e) {
@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         jsonResponse(400, ['error' => 'Wynik nie może przekraczać maksymalnego wyniku.']);
     }
 
-    $percentScore = (int) round(($score / $maxScore) * 100);
+    $percentScore = round(($score / $maxScore) * 100, 2);
 
     // Rate limiting
     $hash = ipHash();
