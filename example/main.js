@@ -104,13 +104,6 @@ function startGame(dictChoice, time) {
 $(document).ready(function() {
     loadLeaderboard();
 
-    try {
-        var savedNick = localStorage.getItem('kalambeer_nick');
-        if (savedNick) {
-            $('#nickname-input').val(savedNick).trigger('input');
-        }
-    } catch(ex) {}
-
     $('#nickname-input').on('input', function() {
         var error = validateNick($.trim($(this).val()));
         if (error) {
@@ -137,6 +130,13 @@ $(document).ready(function() {
     $('#nickname-input').on('keypress', function(e) {
         if (e.which === 13) $('#btn-play').trigger('click');
     });
+
+    try {
+        var savedNick = localStorage.getItem('kalambeer_nick');
+        if (savedNick) {
+            $('#nickname-input').val(savedNick).trigger('input');
+        }
+    } catch(ex) {}
 
     $('#btn-leaderboard').on('click', function() {
         $('.leaderboard-loading').show();

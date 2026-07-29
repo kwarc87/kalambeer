@@ -26,6 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $origin === '') {
+    http_response_code(403);
+    echo json_encode(['error' => 'Niedozwolone żądanie.']);
+    exit;
+}
+
 // ─── DB connection ───────────────────────────────────────────────────────────
 
 function getDb(): PDO {
@@ -47,12 +53,6 @@ function jsonResponse(int $code, array $data): void {
     http_response_code($code);
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
-}
-
-function ipHash(): string {
-    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
-    $ip = trim(explode(',', $ip)[0]);
-    return hash('sha256', $ip . IP_HASH_SALT);
 }
 
 function verifyRecaptcha(string $token): bool {
@@ -81,13 +81,37 @@ function verifyRecaptcha(string $token): bool {
         && $data['score'] >= RECAPTCHA_MIN_SCORE;
 }
 
-function checkRateLimit(PDO $pdo, string $ipHash): bool {
+function ipHash(): string {
+    $ip   = $_SERVER['REMOTE_ADDR'] ?? '';
+    $salt = date('Y-m-d') . RATE_LIMIT_SALT;
+    return hash('sha256', $ip . $salt);
+}
+
+function checkIpRateLimit(PDO $pdo): bool {
+    $hash        = ipHash();
     $windowStart = date('Y-m-d H:i:s', time() - RATE_LIMIT_WINDOW);
-    $stmt = $pdo->prepare(
-        'SELECT COUNT(*) FROM scores WHERE ip_hash = ? AND date > ?'
-    );
-    $stmt->execute([$ipHash, $windowStart]);
-    return (int) $stmt->fetchColumn() < RATE_LIMIT_MAX;
+
+    // Lazy cleanup — usuń wygasłe okna
+    $pdo->prepare('DELETE FROM rate_limits WHERE window_start < ?')
+        ->execute([$windowStart]);
+
+    $stmt = $pdo->prepare('SELECT hits FROM rate_limits WHERE ip_hash = ?');
+    $stmt->execute([$hash]);
+    $row = $stmt->fetch();
+
+    if ($row === false) {
+        $pdo->prepare('INSERT INTO rate_limits (ip_hash, hits, window_start) VALUES (?, 1, NOW())')
+            ->execute([$hash]);
+        return true;
+    }
+
+    if ((int) $row['hits'] >= IP_RATE_LIMIT_MAX) {
+        return false;
+    }
+
+    $pdo->prepare('UPDATE rate_limits SET hits = hits + 1 WHERE ip_hash = ?')
+        ->execute([$hash]);
+    return true;
 }
 
 // ─── GET — top scores ────────────────────────────────────────────────────────
@@ -143,18 +167,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $percentScore = round(($score / $maxScore) * 100, 2);
 
     // Rate limiting
-    $hash = ipHash();
     try {
         $pdo = getDb();
-        if (!checkRateLimit($pdo, $hash)) {
+        if (!checkIpRateLimit($pdo)) {
             jsonResponse(429, ['error' => 'Zbyt wiele zapisów. Spróbuj ponownie za jakiś czas.']);
         }
 
         $stmt = $pdo->prepare(
-            'INSERT INTO scores (nickname, date, score, max_score, percent_score, ip_hash)
-             VALUES (?, NOW(), ?, ?, ?, ?)'
+            'INSERT INTO scores (nickname, date, score, max_score, percent_score)
+             VALUES (?, NOW(), ?, ?, ?)'
         );
-        $stmt->execute([$nickname, $score, $maxScore, $percentScore, $hash]);
+        $stmt->execute([$nickname, $score, $maxScore, $percentScore]);
 
         jsonResponse(200, ['message' => 'Wynik zapisany pomyślnie.']);
     } catch (PDOException $e) {

@@ -20,8 +20,6 @@ define('ALLOWED_ORIGINS', [
 ]);
 
 // Rate limiting
-define('RATE_LIMIT_MAX', 30);        // max submissions per window
 define('RATE_LIMIT_WINDOW', 3600);   // window in seconds (1 hour)
-
-// IP hashing salt (keep secret — prevents reverse-lookup of stored ip_hash values)
-define('IP_HASH_SALT', 'YOUR_IP_HASH_SALT');
+define('IP_RATE_LIMIT_MAX', 50);     // max submissions per window per IP hash
+define('RATE_LIMIT_SALT', 'YOUR_RATE_LIMIT_SALT');
