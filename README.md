@@ -4,8 +4,6 @@
 
 Kalambeer is a Polish word game built with JavaScript, HTML Canvas and a compressed dictionary trie.
 
-> ⚠️ **Refactor in progress** — the codebase is being modernised. Expect breaking changes on `main`.
-
 ## How to play
 
 A random letter grid is generated on an HTML Canvas board. Click and drag across adjacent letters to form Polish words (minimum 3 letters). Each letter can only be used once per word.
@@ -20,8 +18,8 @@ HTML5, Bootstrap 3, jQuery, Canvas API, Touch support (jquery.mobile-events)
 
 Two dictionary modes are available:
 
-- **Basic** — common Polish words only
 - **Full** — extended dictionary including inflected forms (sourced from [sjp.pl](https://sjp.pl))
+- **Basic** — common Polish words only
 
 The dictionary is stored as a serialised prefix tree (`dict_tree_*`) and compressed with pako to minimise load time. A flat array variant (`dict_array_*`) is also kept for reference and tooling.
 
@@ -125,6 +123,10 @@ $('#map').kalambeer({
 });
 </script>
 ```
+
+## Known limitations
+
+- **Word search is synchronous.** `findWordInMatrix` runs a DFS over the entire board on the main thread immediately after `init()`. For the default 4 × 4 grid this completes in milliseconds, but larger grids or very slow devices may cause a brief UI freeze. Consider increasing `baseWordLengthMin`/`baseWordLengthMax` to keep grids compact, or moving the call to a Web Worker for larger configurations.
 
 ## License
 

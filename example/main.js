@@ -8,7 +8,7 @@ function validateNick(nick) {
     nick = nick.trim();
     if (!nick.length) return 'Nick nie może być pusty.';
     if (nick.length < 3) return 'Nick musi mieć co najmniej 3 znaki.';
-    if (nick.length > 20) return 'Nick może mieć maksymalnie 20 znaków.';
+    if (nick.length > 30) return 'Nick może mieć maksymalnie 30 znaków.';
     if (!/^[a-zA-Z0-9\u00C0-\u024F _-]+$/.test(nick)) return 'Nick może zawierać tylko litery, cyfry, spacje, - i _.';
     return null;
 }

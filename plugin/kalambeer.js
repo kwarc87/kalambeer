@@ -7,20 +7,22 @@
         plugin.$element = $(element);
         plugin.lettersProbabilityBasic = {};
         plugin.lettersProbabilityFull = {};
-        plugin.baseWord;
+        plugin.baseWord = '';
         plugin.dictTree = {};
         plugin.map = [];
         plugin.cells = new Array(plugin.settings.width*plugin.settings.height);
-        plugin.cellsMatrix;
+        plugin.cellsMatrix = [];
         plugin.existingWords = [];
+        plugin.existingWordsSet = new Set();
         plugin.possibleCoordinates = [{x:  1, y:  1}, {x: -1, y:  0}, {x: -1, y:  1}, {x:  0, y: -1}, {x: -1, y: -1}, {x:  0, y:  1}, {x:  1, y: -1}, {x:  1, y:  0}];
         plugin.userCurrentWord = '';
         plugin.userCurrentWordPosition = [];
         plugin.userWords = [];
+        plugin.userWordsSet = new Set();
         plugin.score = 0;
         plugin.maxScore = 0;
         plugin.canvasMap = plugin.$element[0].getContext('2d');
-        plugin.cellsAccessMatrix;
+        plugin.cellsAccessMatrix = [];
         plugin.wordsPaths = {};
         plugin.time = plugin.settings.time;
         plugin.counter = false;
@@ -28,8 +30,9 @@
         plugin.wordPathAccumulatedTime = 0;
         plugin.wordPathIsDrawing = false;
         plugin.wordPathGlobalCounter = 0;
-        plugin.checkWordTimeout;
+        plugin.checkWordTimeout = null;
         plugin.wordPathExtended = [];
+        plugin._boundDrawWordPath = plugin.drawWordPath.bind(plugin);
     };
 
     //helper functions
@@ -79,7 +82,6 @@
         if (stroke) {
             ctx.stroke();
         }
-        ctx.closePath();
     };
 
     //methods
@@ -171,11 +173,16 @@
         //this method get random letter for base word respecting wages from optimized dictionary
         randomLetterForBaseWordFromDictionaryTree: function(node) {
             const plugin = this;
-            const lettersArray = Object.keys(node).filter(item => item !== '_' && item !== '$');
+            const lettersArray = [];
+            const probabilityArray = [];
+            for (const key in node) {
+                if (key === '_' || key === '$') continue;
+                lettersArray.push(key);
+                probabilityArray.push(node[key]['$'] || 1);
+            }
             if(!lettersArray.length) {
                 return false;
             }
-            let probabilityArray = Object.values(node).map(item => item['$']).filter(item => item !== undefined);
             return plugin.rouletteRandom(lettersArray, probabilityArray);
         },
         randomLetter: function() {
@@ -190,6 +197,9 @@
                 return lettersArray[0];
             }
             const sum = probabilityArray.reduce((acc, item) => acc + item);
+            if(sum === 0) {
+                return lettersArray[Math.floor(Math.random() * lettersArray.length)];
+            }
             const reducer = (acc, curr, i) => {
                 const value = i > 0 ? curr + acc[i-1] : curr;
                 acc.push(value);
@@ -250,7 +260,6 @@
         },
         tryFillMapWithBaseWord: function() {
             const plugin = this;
-            let newX, newY;
             let x = parseInt(Math.random() * plugin.settings.width);
             let y = parseInt(Math.random() * plugin.settings.height);
             plugin.map[x][y] = plugin.baseWord.charAt(0);
@@ -259,13 +268,9 @@
                 if (!availableCoords.length) {
                     return false;
                 }
-                do {
-                    const coord = plugin.randomCoordinates(availableCoords);
-                    newX = parseInt(x + coord.x);
-                    newY = parseInt(y + coord.y);
-                } while (!plugin.checkBorder(newX, newY) || plugin.map[newX][newY]);
-                x = newX;
-                y = newY;
+                const coord = plugin.randomCoordinates(availableCoords);
+                x = parseInt(x + coord.x);
+                y = parseInt(y + coord.y);
                 plugin.map[x][y] = plugin.baseWord.charAt(i);
             }
             return true;
@@ -329,8 +334,9 @@
             prefix = prefix + letter;
             path = path.concat(cell);
             if (dict._) {
-                if(!plugin.existingWords.includes(prefix.toUpperCase())) {
+                if(!plugin.existingWordsSet.has(prefix.toUpperCase())) {
                     plugin.existingWords.push(prefix.toUpperCase());
+                    plugin.existingWordsSet.add(prefix.toUpperCase());
                 }
                 const wordPosition = plugin.wordsPaths[prefix.toUpperCase()] = [];
                 for (let i = 0; i < path.length; i += 1) {
@@ -649,11 +655,12 @@
         checkWord: function() {
             const plugin = this;
             clearTimeout(plugin.checkWordTimeout);
-            if(plugin.existingWords.includes(plugin.userCurrentWord)) {
+            if(plugin.existingWordsSet.has(plugin.userCurrentWord)) {
                 plugin.blockPath();
-                if(!plugin.userWords.includes(plugin.userCurrentWord)) {
+                if(!plugin.userWordsSet.has(plugin.userCurrentWord)) {
                     plugin.drawEventPath(plugin.settings.cellCorrectColor);
                     plugin.userWords.push(plugin.userCurrentWord);
+                    plugin.userWordsSet.add(plugin.userCurrentWord);
                     plugin.calculateScore(plugin.userCurrentWord);
                     $(plugin.settings.foundWordsSelector).append(`<span class='word'>${plugin.userCurrentWord}</span>`);
                 } else {
@@ -752,7 +759,9 @@
             const plugin = this;
             plugin.cells = new Array(plugin.settings.width*plugin.settings.height);
             plugin.existingWords = [];
+            plugin.existingWordsSet = new Set();
             plugin.userWords = [];
+            plugin.userWordsSet = new Set();
             plugin.userCurrentWord = '';
             plugin.userCurrentWordPosition = [];
             plugin.score = 0;
@@ -772,7 +781,7 @@
         showAllWords: function() {
             const plugin = this;
             for (let i = 0; i < plugin.existingWords.length; i++) {
-                if (plugin.userWords.includes(plugin.existingWords[i])) {
+                if (plugin.userWordsSet.has(plugin.existingWords[i])) {
                     $(plugin.settings.allWordsSelector).append(`<span class='word active'>${plugin.existingWords[i]}</span>`)
                 } else {
                     $(plugin.settings.allWordsSelector).append(`<span class='word'>${plugin.existingWords[i]}</span>`)
@@ -794,8 +803,8 @@
             const time = Date.now();
             plugin.wordPathAccumulatedTime += time - plugin.wordPathLastTime;
             plugin.wordPathLastTime = time;
-            while (plugin.wordPathAccumulatedTime >= plugin.settings.timeForShowingCorrectWord) {
-                plugin.wordPathAccumulatedTime -= plugin.settings.timeForShowingCorrectWord;
+            while (plugin.wordPathAccumulatedTime >= plugin.settings.wordPathAnimationStep) {
+                plugin.wordPathAccumulatedTime -= plugin.settings.wordPathAnimationStep;
                 if (!plugin.wordPathIsDrawing) {
                     return false;
                 }
@@ -811,7 +820,7 @@
                     return false;
                 }
             }
-            requestAnimationFrame(plugin.drawWordPath.bind(plugin));
+            requestAnimationFrame(plugin._boundDrawWordPath);
         },
         showWordPath: function() {
             const plugin = this;
@@ -838,7 +847,7 @@
                 }
                 plugin.wordPathIsDrawing = true;
                 plugin.wordPathLastTime = Date.now();
-                requestAnimationFrame(plugin.drawWordPath.bind(plugin));
+                requestAnimationFrame(plugin._boundDrawWordPath);
             });
         },
         showLongestWordPath: function() {
@@ -881,6 +890,7 @@
             'probabilityFullPath' : 'data/probabilities/probability_full.json',
             'time': 120, //in seconds
             'timeForShowingCorrectWord': 350, //in miliseconds
+            'wordPathAnimationStep': 350, //in miliseconds - step between word path cells in animation
             initCallback: function() { },
             loadCallback: function() { },
             errorCallback: function(e) { },
