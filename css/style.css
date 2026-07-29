@@ -360,7 +360,16 @@ html, body {
 }
 .footer,
 .page-wrap:after {
-    height: 50px;
+    height: 70px;
+}
+.recaptcha-disclaimer {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 4px;
+}
+.recaptcha-disclaimer a {
+    color: #ccc;
+    text-decoration: underline;
 }
 .btn-group-xs>.btn, .btn-xs {
     line-height: 1.3;
