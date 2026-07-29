@@ -390,6 +390,9 @@ html, body {
     .btn-choice-container .btn {
         width: 100%;
     }
+    .btn-choice-container .form-control {
+        width: 100%;
+    }
 }
 @media (min-width: 1200px) {
     .standard-box {
