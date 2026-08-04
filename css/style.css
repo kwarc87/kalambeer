@@ -575,6 +575,9 @@ blockquote {
    Responsive
    ============================================= */
 @media (max-width: 991px) {
+    #results-leaderboard {
+        margin-top: 20px;    
+    }
     .game-layout {
         grid-template-columns: 1fr;
         grid-template-areas:
