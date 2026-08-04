@@ -351,9 +351,16 @@
         },
         createMapCanvas: function() {
             const plugin = this;
+            const dpr = window.devicePixelRatio || 1;
+            const cssW = plugin.settings.width  * plugin.settings.cellSize;
+            const cssH = plugin.settings.height * plugin.settings.cellSize;
             plugin.$element.html('');
-            plugin.$element.attr('width', plugin.settings.width * plugin.settings.cellSize);
-            plugin.$element.attr('height', plugin.settings.height * plugin.settings.cellSize);
+            plugin.$element.attr('width',  cssW * dpr);
+            plugin.$element.attr('height', cssH * dpr);
+            plugin.$element[0].style.width  = cssW + 'px';
+            plugin.$element[0].style.height = cssH + 'px';
+            plugin.canvasMap = plugin.$element[0].getContext('2d');
+            plugin.canvasMap.scale(dpr, dpr);
         },
         drawNewMap: function() {
             const plugin = this;
