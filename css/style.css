@@ -92,6 +92,7 @@ p {
     flex: 1;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 /* =============================================
@@ -127,6 +128,11 @@ p {
     margin-top: auto;
     margin-bottom: auto;
 }
+#view-leaderboard {
+    width: 100%;
+    margin-top: auto;
+    margin-bottom: auto;
+}
 .col-game        { grid-area: game;        display: flex; flex-direction: column; }
 .col-found-words { grid-area: found-words; display: flex; flex-direction: column; }
 .col-rules       { grid-area: rules;       display: flex; flex-direction: column; }
@@ -157,6 +163,7 @@ p {
     border-radius: var(--radius);
     margin-bottom: 20px;
     overflow: hidden;
+    width: 100%;
 }
 .standard-box-header {
     font-family: var(--font-heading);
