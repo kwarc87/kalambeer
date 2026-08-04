@@ -121,7 +121,7 @@
             const plugin = this;
             try {
                 const decoder = new TextDecoder();
-                const uncompressedData = pako.inflate(data);
+                const uncompressedData = pako.inflate(new Uint8Array(data));
                 const jsonString = decoder.decode(uncompressedData);
                 plugin.dictTree = JSON.parse(jsonString);
                 plugin.settings.loadCallback();
@@ -419,19 +419,14 @@
         bindMouseEvents: function() {
             const plugin = this;
             plugin.unbindEvents();
-            let startEvents, moveEvents, endEvents;
-            if($.isTouchCapable()) {
-                startEvents = 'tapstart.kalambeer';
-                moveEvents = 'tapmove.kalambeer';
-                endEvents = 'tapend.kalambeer';
-            } else {
-                startEvents = 'mousedown.kalambeer';
-                moveEvents = 'mousemove.kalambeer';
-                endEvents = 'mouseup.kalambeer';
-            }
-            plugin.$element.on(startEvents, (event, touch) => {
+            const isTouch = 'ontouchstart' in window;
+            const startEvents = isTouch ? 'touchstart.kalambeer' : 'mousedown.kalambeer';
+            const moveEvents  = isTouch ? 'touchmove.kalambeer'  : 'mousemove.kalambeer';
+            const endEvents   = isTouch ? 'touchend.kalambeer'   : 'mouseup.kalambeer';
+
+            plugin.$element.on(startEvents, (event) => {
                 plugin.$element.on(moveEvents, plugin.drawingPath.bind(plugin));
-                plugin.drawingPath(event, touch);
+                plugin.drawingPath(event);
             });
             plugin.$element.on(endEvents, () => {
                 plugin.$element.off(moveEvents);
@@ -446,16 +441,20 @@
             const plugin = this;
             if(plugin.checkBorder(x,y) && !plugin.cellsAccessMatrix[x][y]['active']) { plugin.cellsAccessMatrix[x][y]['allow'] = true; }
         },
-        drawingPath: function(event, touch) {
+        drawingPath: function(event) {
             event.preventDefault();
             const plugin = this;
             const offset = plugin.$element.offset();
             const cellSize = plugin.settings.cellSize;
             const cellTouchMargin = plugin.settings.cellTouchMargin;
             let tempX, tempY;
-            if (touch) {
-                tempX = touch.offset.x;
-                tempY = touch.offset.y;
+            const orig = event.originalEvent;
+            if (orig && orig.touches && orig.touches.length > 0) {
+                tempX = orig.touches[0].pageX - offset.left;
+                tempY = orig.touches[0].pageY - offset.top;
+            } else if (orig && orig.changedTouches && orig.changedTouches.length > 0) {
+                tempX = orig.changedTouches[0].pageX - offset.left;
+                tempY = orig.changedTouches[0].pageY - offset.top;
             } else {
                 tempX = event.pageX - offset.left;
                 tempY = event.pageY - offset.top;
@@ -906,7 +905,16 @@
                 obj.load();
                 $.data(this, 'plugin_kalambeer', obj);
             } else if (typeof methodOrOptions === 'object') {
-                $.error('Kalambeer already initialized');
+                const prev = $.data(this, 'plugin_kalambeer');
+                if (prev) {
+                    if (prev.counter !== false) clearInterval(prev.counter);
+                    clearTimeout(prev.checkWordTimeout);
+                    prev.unbindEvents();
+                }
+                $.removeData(this, 'plugin_kalambeer');
+                const obj = new settings.constructor(this, methodOrOptions);
+                obj.load();
+                $.data(this, 'plugin_kalambeer', obj);
             } else {
                 const plugin = $(this).data('plugin_kalambeer');
                 if ( plugin[methodOrOptions] ) {

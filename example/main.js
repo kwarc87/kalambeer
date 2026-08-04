@@ -106,7 +106,7 @@ $(document).ready(function() {
     loadLeaderboard();
 
     $('#nickname-input').on('input', function() {
-        var error = validateNick($.trim($(this).val()));
+        var error = validateNick($(this).val().trim());
         if (error) {
             $('#nick-error').text(error).show();
             $('#btn-play').prop('disabled', true);
@@ -118,18 +118,18 @@ $(document).ready(function() {
 
     $('#btn-play').on('click', function(e) {
         e.preventDefault();
-        var nick = $.trim($('#nickname-input').val());
+        var nick = $('#nickname-input').val().trim();
         var error = validateNick(nick);
         if (error) { $('#nick-error').text(error).show(); $('#nickname-input').focus(); return; }
         $('#nick-error').hide();
         currentNick = nick;
         try { localStorage.setItem('kalambeer_nick', nick); } catch(ex) {}
         var dictChoice = $('#dict-select').val();
-        startGame(dictChoice, dictChoice === 'full' ? 180 : 60);
+        startGame(dictChoice, dictChoice === 'full' ? 18 : 60);
     });
 
     $('#nickname-input').on('keypress', function(e) {
-        if (e.which === 13) $('#btn-play').trigger('click');
+        if (e.key === 'Enter') $('#btn-play').trigger('click');
     });
 
     try {

@@ -92,6 +92,7 @@ p {
     flex: 1;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 /* =============================================
@@ -575,28 +576,38 @@ blockquote {
    ============================================= */
 @media (max-width: 991px) {
     .game-layout {
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas:
-            "game game"
-            "found-words rules";
-    }
-}
-@media (max-width: 767px) {
-    .game-layout {
         grid-template-columns: 1fr;
         grid-template-areas:
             "game"
             "found-words"
             "rules";
     }
+    /* gap handles spacing — kill double margin from .standard-box */
+    .col-game > .standard-box,
+    .col-found-words > .standard-box,
+    .col-rules > .standard-box {
+        margin-bottom: 0;
+    }
     .navbar {
         margin-bottom: 16px;
     }
     .map {
-        margin: 0 auto;
+        margin: 70px auto 35px;
     }
     .current-word {
-        top: 30px;
+        top: 44px;
+    }
+    /* push start screen below score/timer (top: 15px + ~22px height = ~37px) */
+    .btn-choice-container {
+        top: 52px;
+        transform: none;
+    }
+    .btn-choice-container h2 {
+        font-size: 17px;
+        margin: 36px 0 12px 0;
+    }
+    #btn-play {
+        margin-top: 14px;
     }
     .btn-choice-container .btn,
     .btn-choice-container .form-control {
@@ -604,6 +615,15 @@ blockquote {
     }
     .loader-desc {
         top: 58%;
+    }
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 6px 4px;
+        font-size: 11px;
+    }
+    .leaderboard-table thead th {
+        font-size: 10px;
+        letter-spacing: 0;
     }
 }
 @media (min-width: 1200px) {
