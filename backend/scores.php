@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     score, max_score, percent_score
              FROM scores
              ORDER BY percent_score DESC, score DESC
-             LIMIT 50'
+             LIMIT 100'
         );
         jsonResponse(200, ['scores' => $stmt->fetchAll()]);
     } catch (PDOException $e) {
