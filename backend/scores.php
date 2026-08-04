@@ -82,16 +82,15 @@ function verifyRecaptcha(string $token): bool {
 }
 
 function ipHash(): string {
-    $ip   = $_SERVER['REMOTE_ADDR'] ?? '';
-    $salt = date('Y-m-d') . RATE_LIMIT_SALT;
-    return hash('sha256', $ip . $salt);
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    return hash_hmac('sha256', $ip . date('Y-m-d'), RATE_LIMIT_SALT);
 }
 
 function checkIpRateLimit(PDO $pdo): bool {
     $hash        = ipHash();
     $windowStart = date('Y-m-d H:i:s', time() - RATE_LIMIT_WINDOW);
 
-    // Lazy cleanup — usuń wygasłe okna
+    // Lazy cleanup — remove expired windows
     $pdo->prepare('DELETE FROM rate_limits WHERE window_start < ?')
         ->execute([$windowStart]);
 
