@@ -125,7 +125,7 @@ $(document).ready(function() {
         currentNick = nick;
         try { localStorage.setItem('kalambeer_nick', nick); } catch(ex) {}
         var dictChoice = $('#dict-select').val();
-        startGame(dictChoice, dictChoice === 'full' ? 18 : 60);
+        startGame(dictChoice, dictChoice === 'full' ? 180 : 60);
     });
 
     $('#nickname-input').on('keypress', function(e) {
