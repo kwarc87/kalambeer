@@ -7,7 +7,7 @@
     --clr-surface-header: #251f2b;
     --clr-border:         rgba(255, 255, 255, 0.08);
     --clr-red:            #C0344B;
-    --clr-red-dark:       #8A1B2D;
+    --clr-red-dark:       #731527;
     --clr-green:          #2B8603;
     --clr-green-dark:     #0A7D01;
     --clr-text:           #f0edf5;
@@ -322,7 +322,7 @@ label.error {
     cursor: pointer;
 }
 .map-results {
-    margin: 20px auto;
+    margin: 40px auto 0 auto;
     opacity: 0.65;
 }
 .loader-bar {
@@ -592,7 +592,10 @@ blockquote {
         margin-bottom: 16px;
     }
     .map {
-        margin: 70px auto 35px;
+        margin: 80px auto 40px;
+    }
+    .map-results {
+        margin: 40px auto 0;
     }
     .current-word {
         top: 44px;
