@@ -362,7 +362,7 @@
             const width = plugin.settings.width;
             const height = plugin.settings.height;
             plugin.canvasMap.beginPath();
-            plugin.canvasMap.fillStyle = '#ffffff';
+            plugin.canvasMap.fillStyle = '#1d1921';
             plugin.canvasMap.fillRect(0, 0, width*cellSize, height*cellSize);
             plugin.canvasMap.closePath();
             for (let i = 0; i < width; i++) {
@@ -868,15 +868,15 @@
             'cellTouchMargin': 2,
             'marginBetweenCells': 2,
             'cellBorderRadius': 7,
-            'cellColor' : '#D20107',
+            'cellColor' : '#C0344B',
             'cellLetterColor' : '#FFFFFF',
-            'cellActiveColor' : '#8C0005',
+            'cellActiveColor' : '#8A1B2D',
             'cellRepetitionColor' : '#DF780A',
             'cellCorrectColor' : '#2B8603',
             'cellFontFamily': 'Arial',
             'cellFontSize': 28,
             'cellFontBold': 600,
-            'arrowColor' : '#f7a3a3',
+            'arrowColor' : '#e8909e',
             'baseWordLengthMin' : 12,
             'baseWordLengthMax' : 15, //max length = 15 due to the limitations of the available dictionary
             'scoreSelector' : '#score',

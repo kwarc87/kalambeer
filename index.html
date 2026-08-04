@@ -18,10 +18,7 @@
         <!-- Local fonts (Open Sans + Roboto Slab) -->
         <link href="css/fonts.css" media="all" rel="stylesheet" type="text/css">
 
-        <!-- Framework and asset stylesheets -->
-        <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous" media="all" rel="stylesheet" type="text/css">
-
-        <link href="css/style.min.css?v=2.0" media="all" rel="stylesheet" type="text/css">
+        <link href="css/style.css" media="all" rel="stylesheet" type="text/css">
 
         <!-- Fav icons -->
         <link rel="icon" href="img/favicon.png" type="image/png">
@@ -33,22 +30,18 @@
     <body>
         <div class="page-wrap">
             <div class="container">
-                <nav class="navbar navbar-inverse">
-                    <div class="container-fluid">
-                        <div class="navbar-header">
-                            <a class="navbar-brand" href="index.html">
-                                <img class="img-responsive" src="img/kalambeer.png" alt="Kalambeer">
-                            </a>
-                        </div>
-                    </div>
+                <nav class="navbar">
+                    <a class="navbar-brand" href="index.html">
+                        <img src="img/kalambeer.png" alt="Kalambeer">
+                    </a>
                 </nav>
-                <div id="view-game" class="row">
-                    <div class="col-md-6 col-md-push-3">
+                <div id="view-game" class="game-layout">
+                    <div class="col-game">
                         <div class="standard-box">
                             <div class="standard-box-content">
                                 <div id="dict-choice" class="btn-choice-container text-center">
                                     <h2>Witaj w Kalambeer!</h2>
-                                    <div class="form-group">
+                                    <div class="form-field">
                                         <input type="text" id="nickname-input" class="form-control" placeholder="Twój nick" maxlength="30" autocomplete="off">
                                         <div id="nick-error" class="nick-error" style="display:none"></div>
                                     </div>
@@ -56,17 +49,17 @@
                                         <option value="full">Słownik pełny</option>
                                         <option value="basic">Słownik podstawowy (bez odmian wyrazów)</option>
                                     </select>
-                                    <button id="btn-play" class="btn btn-success btn-lg btn-block" disabled>GRAJ!</button>
-                                    <button id="btn-leaderboard" class="btn btn-danger btn-lg btn-block">Tablica Wyników</button>
+                                    <button id="btn-play" class="btn btn--success" disabled>GRAJ!</button>
+                                    <button id="btn-leaderboard" class="btn btn--danger">Tablica Wyników</button>
                                 </div>
                                 <div id="results1" class="results results-first" style="display:none">
                                     <div id="messages" class="alert alert-danger" style="display:none"></div>
                                     <h3 class="text-center">Twój wynik:</h3>
                                     <h3 class="text-center percent-result" id="percent-score"></h3>
                                     <div id="save-score-status" style="display:none"></div>
-                                    <button class="btn btn-success btn-lg btn-block btn-restart">Zagraj jeszcze raz</button>
+                                    <button class="btn btn--success btn-restart">Zagraj jeszcze raz</button>
                                 </div>
-                                <img id="game-loader" class="img-responsive game-loader" src="img/loader.gif" alt="Loader" style="display: none">
+                                <div id="game-loader" class="loader-bar" style="display: none"></div>
                                 <p id="loader-desc" class="loader-desc text-center" style="display: none">Ładowanie słownika</p>
                                 <h3 class="timer">Czas: <span id="timer">0:00</span></h3>
                                 <h3 class="score">Wynik: <span id="score">0</span> / <span id="max-score">0</span></h3>
@@ -78,21 +71,20 @@
                                         <div id="all-words-list"></div>
                                     </div>
                                 </div>
-                                <div class="clearfix"></div>
                             </div>
                         </div>
                         <div id="results-leaderboard" class="standard-box" style="display:none">
                             <h2 class="standard-box-header">Tablica wyników</h2>
                             <div class="standard-box-content">
                                 <p id="results-lb-loading" class="text-center leaderboard-loading">Loading...</p>
-                                <table id="results-lb-table" class="table table-striped leaderboard-table" style="display:none">
+                                <table id="results-lb-table" class="leaderboard-table" style="display:none">
                                     <thead><tr><th>#</th><th>Nick</th><th>Wynik %</th><th>Punkty</th><th>Data</th></tr></thead>
                                     <tbody id="results-lb-body"></tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3 col-md-push-3">
+                    <div class="col-found-words">
                         <div class="standard-box">
                             <h2 class="standard-box-header">Znalezione słowa</h2>
                             <div class="standard-box-content">
@@ -100,7 +92,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3 col-md-pull-9">
+                    <div class="col-rules">
                         <div class="standard-box">
                             <h2 class="standard-box-header">Zasady</h2>
                             <div class="standard-box-content">
@@ -130,35 +122,31 @@
                         </div>
                     </div>
                 </div>
-                <div id="view-leaderboard" class="row" style="display:none">
-                    <div class="col-md-12">
-                        <div class="standard-box">
-                            <h2 class="standard-box-header">Tablica wyników</h2>
-                            <div class="standard-box-content">
-                                <p id="page-lb-loading" class="text-center leaderboard-loading">Ładowanie...</p>
-                                <table id="page-lb-table" class="table table-striped leaderboard-table" style="display:none">
-                                    <thead><tr><th>#</th><th>Nick</th><th>Wynik %</th><th>Punkty</th><th>Data</th></tr></thead>
-                                    <tbody id="page-lb-body"></tbody>
-                                </table>
-                                <button class="btn btn-danger btn-lg btn-block btn-back">&#8592; Wróć do gry</button>
-                            </div>
+                <div id="view-leaderboard" class="leaderboard-layout" style="display:none">
+                    <div class="standard-box">
+                        <h2 class="standard-box-header">Tablica wyników</h2>
+                        <div class="standard-box-content">
+                            <p id="page-lb-loading" class="text-center leaderboard-loading">Ładowanie...</p>
+                            <table id="page-lb-table" class="leaderboard-table" style="display:none">
+                                <thead><tr><th>#</th><th>Nick</th><th>Wynik %</th><th>Punkty</th><th>Data</th></tr></thead>
+                                <tbody id="page-lb-body"></tbody>
+                            </table>
+                            <button class="btn btn--danger btn-back">&#8592; Wróć do gry</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="container">
-            <footer class="footer text-center">
-                <a href="http://jakubkwarcinski.pl" title="Jakub Kwarciński - Frontend Developer">Jakub Kwarciński</a> &copy; <span id="footer-year"></span>
+        <footer class="footer">
+            <div class="container">
+                <p><a href="http://jakubkwarcinski.pl" title="Jakub Kwarciński - Frontend Developer">Jakub Kwarciński</a> &copy; <span id="footer-year"></span></p>
                 <div class="recaptcha-disclaimer">Ta strona jest chroniona przez reCAPTCHA. Obowiązuje <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Polityka prywatności</a> i <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Warunki korzystania z usług</a> Google.</div>
-            </footer>
-        </div>
+            </div>
+        </footer>
 
         <!-- JS -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" integrity="sha384-UM1JrZIpBwVf5jj9dTKVvGiiZPZTLVoq4sfdvIe9SBumsvCuv6AHDNtEiIb5h1kU" crossorigin="anonymous"></script>
-        <!-- Bootstrap 3.3.6 -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
         <!-- jQuery validate 1.15.1 -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.15.1/jquery.validate.min.js" integrity="sha384-Om50fO/dfF7luueqUW4/G1uu9pDUoeqXn8q0j4bbUTgYkIZhFzf02l8sL+z2I38I" crossorigin="anonymous"></script>
         <!-- jQuery mobile events -->
