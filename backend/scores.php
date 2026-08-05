@@ -1,6 +1,8 @@
 <?php
 
-require_once __DIR__ . '/config.php';
+// mod_php exposes SetEnv via getenv(); PHP-FPM exposes it via $_SERVER
+$configPath = getenv('KALAMBEER_CONFIG') ?: ($_SERVER['KALAMBEER_CONFIG'] ?? __DIR__ . '/config.php');
+require_once $configPath;
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 
@@ -57,7 +59,7 @@ function jsonResponse(int $code, array $data): void {
 
 function verifyRecaptcha(string $token): bool {
     // If no secret configured yet, skip verification (development mode)
-    if (RECAPTCHA_SECRET === 'TWOJ_RECAPTCHA_SECRET_KEY') {
+    if (RECAPTCHA_SECRET === 'YOUR_RECAPTCHA_SECRET_KEY') {
         return true;
     }
     $response = file_get_contents('https://www.google.com/recaptcha/api/siteverify', false,

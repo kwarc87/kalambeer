@@ -89,6 +89,8 @@ function startGame(dictChoice, time) {
             $('#map').removeClass('map-results');
             $('#all-words-list').text('');
             $('#save-score-status').hide();
+            // Clear any leftover highlight from a previous game's successful save
+            $('#results-lb-body tr, #page-lb-body tr').removeClass('lb-highlight');
         },
         endCallback: function() {
             currentMaxScore = parseInt($('#max-score').text());

@@ -21,6 +21,7 @@ dictfull_full.json
 
 # Backend — credentials (never commit)
 backend/config.php
+backend/.htaccess
 .idea/
 *.swp
 *.swo
