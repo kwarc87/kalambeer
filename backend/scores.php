@@ -1,7 +1,7 @@
 <?php
 
 // mod_php exposes SetEnv via getenv(); PHP-FPM exposes it via $_SERVER
-$configPath = getenv('KALAMBEER_CONFIG') ?: ($_SERVER['KALAMBEER_CONFIG'] ?? __DIR__ . '/config.php');
+$configPath = getenv('KALAMBEER_CONFIG') ?: ($_SERVER['KALAMBEER_CONFIG'] ?? __DIR__ . '/../config/config.php');
 require_once $configPath;
 
 // ─── CORS ───────────────────────────────────────────────────────────────────

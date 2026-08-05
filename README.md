@@ -50,6 +50,9 @@ scripts/
   create_dict.js       # Node.js script to rebuild dictionaries from source
 backend/
   scores.php           # leaderboard API (example-specific)
+config/
+  config.example.php   # template — copy to config.php and fill in real credentials
+  config.php           # real credentials, gitignored, kept outside backend/ on purpose
 ```
 
 ## Plugin usage
