@@ -12,6 +12,7 @@ define('DB_CHARSET', 'utf8mb4');
 // Choose reCAPTCHA v3, add domains: jakubkwarcinski.pl and kwarc87.github.io
 define('RECAPTCHA_SECRET', 'YOUR_RECAPTCHA_SECRET_KEY');
 define('RECAPTCHA_MIN_SCORE', 0.5);
+define('RECAPTCHA_EXPECTED_ACTION', 'submit_score'); // must match the action passed to grecaptcha.execute()
 
 // Allowed origins (CORS)
 define('ALLOWED_ORIGINS', [

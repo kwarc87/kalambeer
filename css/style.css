@@ -523,10 +523,10 @@ label.error {
 .leaderboard-table tbody tr:hover td {
     background: rgba(255, 255, 255, 0.05);
 }
-.leaderboard-table tbody tr:nth-child(1) td:first-child { color: #e6b94a; font-weight: bold; }
-.leaderboard-table tbody tr:nth-child(2) td:first-child { color: #b0b0b0; font-weight: bold; }
-.leaderboard-table tbody tr:nth-child(3) td:first-child { color: #cd7f32; font-weight: bold; }
-.leaderboard-table tbody tr.lb-highlight td { background-color: rgba(210, 1, 7, 0.12); }
+.leaderboard-table tbody tr:nth-child(1) td { background-color: #C98910; font-weight: bold; }
+.leaderboard-table tbody tr:nth-child(2) td { background-color: #B0B0B0; font-weight: bold; }
+.leaderboard-table tbody tr:nth-child(3) td { background-color: #965A38; font-weight: bold; }
+.leaderboard-table tbody tr.lb-highlight td { background-color: #c0344b !important; }
 .btn-back {
     margin-top: 12px;
 }

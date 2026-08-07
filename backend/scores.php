@@ -4,6 +4,9 @@
 $configPath = getenv('KALAMBEER_CONFIG') ?: ($_SERVER['KALAMBEER_CONFIG'] ?? __DIR__ . '/../config/config.php');
 require_once $configPath;
 
+// Body is just nickname + score fields + token — no legitimate request needs more.
+define('MAX_PAYLOAD_BYTES', 8192);
+
 // ─── CORS ───────────────────────────────────────────────────────────────────
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -58,9 +61,12 @@ function jsonResponse(int $code, array $data): void {
 }
 
 function verifyRecaptcha(string $token): bool {
-    // If no secret configured yet, skip verification (development mode)
-    if (RECAPTCHA_SECRET === 'YOUR_RECAPTCHA_SECRET_KEY') {
-        return true;
+    // Fail closed on misconfiguration — never silently skip verification.
+    if (
+        RECAPTCHA_SECRET === '' ||
+        RECAPTCHA_SECRET === 'YOUR_RECAPTCHA_SECRET_KEY'
+    ) {
+        return false;
     }
     $response = file_get_contents('https://www.google.com/recaptcha/api/siteverify', false,
         stream_context_create(['http' => [
@@ -78,9 +84,10 @@ function verifyRecaptcha(string $token): bool {
         return false;
     }
     $data = json_decode($response, true);
-    return isset($data['success'], $data['score'])
+    return isset($data['success'], $data['score'], $data['action'])
         && $data['success'] === true
-        && $data['score'] >= RECAPTCHA_MIN_SCORE;
+        && $data['score'] >= RECAPTCHA_MIN_SCORE
+        && hash_equals(RECAPTCHA_EXPECTED_ACTION, (string) $data['action']);
 }
 
 function ipHash(): string {
@@ -96,23 +103,19 @@ function checkIpRateLimit(PDO $pdo): bool {
     $pdo->prepare('DELETE FROM rate_limits WHERE window_start < ?')
         ->execute([$windowStart]);
 
+    // Atomic upsert (requires UNIQUE/PRIMARY KEY on ip_hash) — avoids the
+    // SELECT-then-INSERT/UPDATE race condition where concurrent requests
+    // could both read the same hit count and bypass the limit.
+    $pdo->prepare(
+        'INSERT INTO rate_limits (ip_hash, hits, window_start) VALUES (?, 1, NOW())
+         ON DUPLICATE KEY UPDATE hits = hits + 1'
+    )->execute([$hash]);
+
     $stmt = $pdo->prepare('SELECT hits FROM rate_limits WHERE ip_hash = ?');
     $stmt->execute([$hash]);
     $row = $stmt->fetch();
 
-    if ($row === false) {
-        $pdo->prepare('INSERT INTO rate_limits (ip_hash, hits, window_start) VALUES (?, 1, NOW())')
-            ->execute([$hash]);
-        return true;
-    }
-
-    if ((int) $row['hits'] >= IP_RATE_LIMIT_MAX) {
-        return false;
-    }
-
-    $pdo->prepare('UPDATE rate_limits SET hits = hits + 1 WHERE ip_hash = ?')
-        ->execute([$hash]);
-    return true;
+    return $row !== false && (int) $row['hits'] <= IP_RATE_LIMIT_MAX;
 }
 
 // ─── GET — top scores ────────────────────────────────────────────────────────
@@ -135,7 +138,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 // ─── POST — save score ───────────────────────────────────────────────────────
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $body = json_decode(file_get_contents('php://input'), true);
+    // Reject oversized requests before parsing; Content-Length can be absent/spoofed,
+    // so also cap the actual bytes read regardless of the header.
+    $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+    if ($contentLength > MAX_PAYLOAD_BYTES) {
+        jsonResponse(413, ['error' => 'Żądanie zbyt duże.']);
+    }
+
+    $raw = file_get_contents('php://input', false, null, 0, MAX_PAYLOAD_BYTES + 1);
+    if ($raw === false || strlen($raw) > MAX_PAYLOAD_BYTES) {
+        jsonResponse(413, ['error' => 'Żądanie zbyt duże.']);
+    }
+
+    $body = json_decode($raw, true);
 
     if (!is_array($body)) {
         jsonResponse(400, ['error' => 'Nieprawidłowe dane wejściowe.']);
