@@ -624,7 +624,7 @@ blockquote {
     }
     .leaderboard-table th,
     .leaderboard-table td {
-        padding: 6px 4px;
+        padding: 6px 2px;
         font-size: 11px;
     }
     .leaderboard-table thead th {
@@ -641,10 +641,10 @@ blockquote {
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .leaderboard-table th:nth-child(1), .leaderboard-table td:nth-child(1) { width: 20px; }
-    .leaderboard-table th:nth-child(3), .leaderboard-table td:nth-child(3) { width: 62px; }
+    .leaderboard-table th:nth-child(1), .leaderboard-table td:nth-child(1) { width: 24px; }
+    .leaderboard-table th:nth-child(3), .leaderboard-table td:nth-child(3) { width: 56px; }
     .leaderboard-table th:nth-child(4), .leaderboard-table td:nth-child(4) { width: 76px; }
-    .leaderboard-table th:nth-child(5), .leaderboard-table td:nth-child(5) { width: 76px; }
+    .leaderboard-table th:nth-child(5), .leaderboard-table td:nth-child(5) { width: 68px; }
 }
 @media (min-width: 1200px) {
     .standard-box {
