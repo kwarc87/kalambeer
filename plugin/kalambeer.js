@@ -837,6 +837,7 @@
                 $(plugin.settings.allWordsSelector).find('.word').removeClass('checking');
                 $(this).addClass('checking');
                 const word = $(this).text();
+                $(plugin.settings.meaningWordSelector).attr('href', `https://sjp.pl/${word.toLowerCase()}`);
                 const wordPath = plugin.wordsPaths[word];
                 for (let i = 0; i < wordPath.length; i++) {
                     const x = wordPath[i].x;
@@ -891,6 +892,7 @@
             'foundWordsSelector': '#found-words',
             'currentWordSelector': '#current-word',
             'allWordsSelector': '#all-words-list',
+            'meaningWordSelector': '#word-meaning',
             'dictionaryFullPath' : 'data/dict_tree_basic_compressed',
             'probabilityBasicPath' : 'data/probabilities/probability_basic.json',
             'probabilityFullPath' : 'data/probabilities/probability_full.json',
