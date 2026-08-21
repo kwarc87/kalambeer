@@ -24,7 +24,7 @@
         plugin.canvasMap = plugin.$element[0].getContext('2d');
         plugin.cellsAccessMatrix = [];
         plugin.wordsPaths = {};
-        plugin.time = plugin.settings.time;
+        plugin.time = 0;
         plugin.counter = false;
         plugin.wordPathLastTime = 0;
         plugin.wordPathAccumulatedTime = 0;
@@ -719,6 +719,7 @@
                 plugin.maxScore += scoreForWord;
             }
             $(plugin.settings.maxScoreSelector).text(plugin.maxScore);
+            plugin.time = Math.min(420, 150 + Math.floor(plugin.maxScore / 500) * 30);
         },
         updateCounter: function() {
             const plugin = this;
@@ -774,7 +775,7 @@
             $(plugin.settings.scoreSelector).text(plugin.score);
             plugin.maxScore = 0;
             $(plugin.settings.maxScoreSelector).text(plugin.maxScore);
-            plugin.time = plugin.settings.time;
+            plugin.time = 0;
             if(plugin.counter !== false) {
                 clearInterval(plugin.counter);
                 plugin.counter = false;
@@ -894,7 +895,6 @@
             'dictionaryFullPath' : 'data/dict_tree_basic_compressed',
             'probabilityBasicPath' : 'data/probabilities/probability_basic.json',
             'probabilityFullPath' : 'data/probabilities/probability_full.json',
-            'time': 120, //in seconds
             'timeForShowingCorrectWord': 350, //in miliseconds
             'wordPathAnimationStep': 350, //in miliseconds - step between word path cells in animation
             initCallback: function() { },

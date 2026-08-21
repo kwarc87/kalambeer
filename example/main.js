@@ -66,7 +66,7 @@ function saveScore(nickname, score, maxScore) {
     });
 }
 
-function startGame(dictChoice, time) {
+function startGame(dictChoice) {
     $('#dict-choice').hide();
     $('#game-loader').show();
     $('#loader-desc').show();
@@ -74,7 +74,6 @@ function startGame(dictChoice, time) {
     $('#map').kalambeer({
         mode: dictChoice,
         dictionaryFullPath: 'data/dict_tree_' + dictChoice + '_compressed',
-        time: time,
         loadCallback: function() {
             $('#game-loader, #loader-desc').hide();
             $('#map').kalambeer('init');
@@ -127,7 +126,7 @@ $(document).ready(function() {
         currentNick = nick;
         try { localStorage.setItem('kalambeer_nick', nick); } catch(ex) {}
         var dictChoice = $('#dict-select').val();
-        startGame(dictChoice, dictChoice === 'full' ? 180 : 60);
+        startGame(dictChoice);
     });
 
     $('#nickname-input').on('keypress', function(e) {
