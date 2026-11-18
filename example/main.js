@@ -86,6 +86,7 @@ function startGame(dictChoice) {
         initCallback: function() {
             $('#results1, #results2, #messages, #results-leaderboard, #game-loader').hide();
             $('#map').removeClass('map-results');
+            $('#progress').show();
             $('#all-words-list').text('');
             $('#save-score-status').hide();
             // Clear any leftover highlight from a previous game's successful save

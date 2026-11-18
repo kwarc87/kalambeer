@@ -710,6 +710,14 @@
                 plugin.score += (length-2)*(length-2);
             }
             $(plugin.settings.scoreSelector).text(plugin.score);
+            plugin.updateProgress();
+        },
+        updateProgress: function() {
+            const plugin = this;
+            const percent = plugin.maxScore > 0 ? (plugin.score / plugin.maxScore) * 100 : 0;
+            $(plugin.settings.progressFillSelector).css('width', percent.toFixed(2) + '%');
+            $(plugin.settings.progressTextSelector).text(percent.toFixed(2) + '%');
+            $(plugin.settings.progressFillSelector).parent().attr('aria-valuenow', percent.toFixed(2));
         },
         calculateMaxScore: function() {
             const plugin = this;
@@ -719,6 +727,7 @@
                 plugin.maxScore += scoreForWord;
             }
             $(plugin.settings.maxScoreSelector).text(plugin.maxScore);
+            plugin.updateProgress();
             plugin.time = Math.min(420, 150 + Math.floor(plugin.maxScore / 500) * 30);
         },
         updateCounter: function() {
@@ -775,6 +784,7 @@
             $(plugin.settings.scoreSelector).text(plugin.score);
             plugin.maxScore = 0;
             $(plugin.settings.maxScoreSelector).text(plugin.maxScore);
+            plugin.updateProgress();
             plugin.time = 0;
             if(plugin.counter !== false) {
                 clearInterval(plugin.counter);
@@ -889,6 +899,8 @@
             'scoreSelector' : '#score',
             'timerSelector' : '#timer',
             'maxScoreSelector' : '#max-score',
+            'progressFillSelector' : '#progress-fill',
+            'progressTextSelector' : '#progress-text',
             'foundWordsSelector': '#found-words',
             'currentWordSelector': '#current-word',
             'allWordsSelector': '#all-words-list',

@@ -325,6 +325,36 @@ label.error {
     margin: 40px auto 0 auto;
     opacity: 0.65;
 }
+.progress {
+    position: relative;
+    width: 260px;
+    max-width: 100%;
+    height: 32px;
+    margin: 16px auto 0;
+    background: var(--clr-bg);
+    border: 3px solid rgba(255, 255, 255, 0.22);
+    border-radius: var(--radius);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.progress-fill {
+    height: 100%;
+    width: 0;
+    background: var(--clr-green);
+    transition: width 0.3s ease;
+}
+.progress-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--clr-text);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
 .loader-bar {
     position: absolute;
     top: 50%;
@@ -595,7 +625,10 @@ blockquote {
         margin-bottom: 16px;
     }
     .map {
-        margin: 80px auto 40px;
+        margin: 80px auto 0;
+    }
+    .progress {
+        margin-bottom: 40px;
     }
     .map-results {
         margin: 40px auto 0;
