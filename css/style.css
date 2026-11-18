@@ -326,16 +326,16 @@ label.error {
     opacity: 0.65;
 }
 .progress {
-    position: relative;
-    width: 260px;
-    max-width: 100%;
+    position: absolute;
+    top: 58px;
+    left: 16px;
+    right: 16px;
     height: 32px;
-    margin: 16px auto 0;
     background: var(--clr-bg);
     border: 3px solid rgba(255, 255, 255, 0.22);
     border-radius: var(--radius);
     overflow: hidden;
-    flex-shrink: 0;
+    z-index: 11;
 }
 .progress-fill {
     height: 100%;
@@ -412,7 +412,7 @@ label.error {
 .timer { right: 15px; }
 .current-word {
     position: absolute;
-    top: 40px;
+    top: 102px;
     width: 100%;
     text-align: center;
     left: 0;
@@ -440,7 +440,7 @@ label.error {
     font-size: 20px;
     font-weight: 600;
     text-transform: uppercase;
-    margin: 60px 0 20px;
+    margin: 76px 0 20px;
 }
 .results .percent-result {
     font-size: 44px;
@@ -625,16 +625,13 @@ blockquote {
         margin-bottom: 16px;
     }
     .map {
-        margin: 80px auto 0;
-    }
-    .progress {
-        margin-bottom: 40px;
+        margin: 146px auto 40px;
     }
     .map-results {
         margin: 40px auto 0;
     }
     .current-word {
-        top: 44px;
+        top: 102px;
     }
     /* push start screen below score/timer (top: 15px + ~22px height = ~37px) */
     .btn-choice-container {
